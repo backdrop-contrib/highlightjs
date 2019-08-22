@@ -1,0 +1,115 @@
+<?php
+/**
+ * @file
+ * Integrates the highlight.js library to provide syntax highlighting for code
+ * blocks.
+ */
+
+/**
+ * Implements hook_init().
+ */
+function highlightjs_init() {
+  $path = backdrop_get_path('module', 'highlightjs');
+  $style = config_get('highlightjs.settings', 'style');
+
+  // Add the CSS and JS on every page.
+  backdrop_add_css("$path/highlight.js/styles/$style", array(
+    'group' => CSS_SYSTEM,
+    'every_page' => TRUE,
+  ));
+  backdrop_add_js("$path/highlight.js/highlight.min.js", array(
+    'group' => JS_LIBRARY,
+    'every_page' => TRUE,
+  ));
+  backdrop_add_js("$path/js/highlightjs.js", array(
+    'group' => JS_DEFAULT,
+    'every_page' => TRUE,
+  ));
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function highlightjs_config_info() {
+  return array(
+    'highlightjs.settings' => array(
+      'label' => t('highlight.js settings'),
+      'group' => t('Configuration'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function highlightjs_menu() {
+  return array(
+    'admin/config/content/highlightjs' => array(
+      'title' => 'highlight.js',
+      'description' => 'Configure the highlight.js library.',
+      'page callback' => 'backdrop_get_form',
+      'page arguments' => array('highlightjs_settings_form'),
+      'access arguments' => array('administer site configuration'),
+    ),
+  );
+}
+
+/**
+ * Form callback for the highlight.js settings form.
+ */
+function highlightjs_settings_form($form, $form_state) {
+  $settings = config_get('highlightjs.settings');
+  $form['#config'] = 'highlightjs.settings';
+
+  $form['style'] = array(
+    '#type' => 'select',
+    '#title' => t('Style'),
+    '#description' => t('View examples of each style at the <a href="@demo" target="_blank">highlight.js demo site</a>.', array(
+      '@demo' => 'https://highlightjs.org/static/demo/',
+    )),
+    '#options' => highlightjs_list_styles(),
+    '#default_value' => $settings['style'],
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * List the available styles.
+ *
+ * @return array
+ *   A list of available styles, obtained by parsing the 'styles' directory in
+ *   the hightlight.js library.
+ */
+function highlightjs_list_styles() {
+  static $styles;
+
+  if (!isset($styles)) {
+    $styles = array();
+
+    // Get CSS filenames from 'styles' directory.
+    $path = backdrop_get_path('module', 'highlightjs') . '/highlight.js/styles';
+    $files = file_scan_directory($path, '/^.+\.min\.css$/i', array(
+      'recurse' => FALSE,
+      'key' => 'filename',
+    ));
+
+    foreach (array_keys($files) as $file) {
+      // Strip '.min.css' from filename.
+      $name = substr($file, 0, -8);
+      // Replace all '-' with ' '.
+      $name = str_replace('-', ' ', $name);
+      // Make first letter uppercase.
+      $name = backdrop_ucfirst($name);
+      // Add to list.
+      $styles[$file] = $name;
+    }
+
+    // Sort list alphabetically, then move 'Default' to the beginning.
+    asort($styles);
+    $styles = array('default.min.css' => $styles['default.min.css']) + $styles;
+  }
+
+  return $styles;
+}
+
