@@ -1,0 +1,12 @@
+<?php
+/**
+ * @file
+ * Install, update, and uninstall functions for the highlight.js module.
+ */
+
+/**
+ * Set a default value for the new Tag(s) option.
+ */
+function highlightjs_update_1100(&$sandbox) {
+  config_set('highlightjs.settings', 'tags', 'pre code');
+}

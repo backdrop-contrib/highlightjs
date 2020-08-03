@@ -1,5 +1,6 @@
 {
   "_config_name": "highlightjs.settings",
-  "style": "default.min.css"
+  "style": "default.min.css",
+  "tags": "pre code"
 }
 
