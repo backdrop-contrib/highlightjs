@@ -25,6 +25,14 @@ function highlightjs_init() {
     'group' => JS_DEFAULT,
     'every_page' => TRUE,
   ));
+
+  // Add settings from config.
+  $settings = array(
+    'highlightjs' => array(
+      'tags' => config_get('highlightjs.settings', 'tags'),
+    ),
+  );
+  backdrop_add_js($settings, 'setting');
 }
 
 /**
@@ -69,6 +77,16 @@ function highlightjs_settings_form($form, $form_state) {
     )),
     '#options' => highlightjs_list_styles(),
     '#default_value' => $settings['style'],
+  );
+  $form['tags'] = array(
+    '#type' => 'select',
+    '#title' => t('Tag(s)'),
+    '#description' => t('Which tag(s) your highlighted code will be surrounded by.'),
+    '#options' => array(
+      'pre code' => '<pre><code>',
+      'code' => '<code>',
+    ),
+    '#default_value' => $settings['tags'],
   );
 
   return system_settings_form($form);

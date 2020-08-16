@@ -8,7 +8,9 @@
 Backdrop.behaviors.highlightjs = {
   attach: function(context, settings) {
 
-    hljs.initHighlightingOnLoad();
+    $(Backdrop.settings.highlightjs.tags).each(function(i, block) {
+      hljs.highlightBlock(block);
+    });
 
   }
 };
